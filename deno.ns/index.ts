@@ -5,6 +5,7 @@ import { args } from './deno/args.js';
 import { build } from './deno/build.js';
 import { env } from './deno/env.js';
 import { errors } from './deno/errors.js';
+import { exit } from './deno/exit.js';
 import { listen } from './deno/listen.js';
 import { mkdir } from './deno/mkdir.js';
 import { open } from './deno/open.js';
@@ -25,6 +26,7 @@ export const Deno: typeof globalThis.Deno = {
 	build,
 	env,
 	errors,
+	exit,
 	listen,
 	mkdir,
 	open,

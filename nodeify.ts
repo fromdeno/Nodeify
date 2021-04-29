@@ -10,7 +10,7 @@ export const build = async (entrypoint: string, outDir: string) => {
 
   if (result.diagnostics.length > 0) {
     console.error(result.diagnostics);
-    Deno.exit(1);
+    // Deno.exit(1);
   }
 
   const map: Record<string, string> = {};
@@ -58,18 +58,19 @@ export const build = async (entrypoint: string, outDir: string) => {
     await Deno.writeTextFile(mapped, replaced);
   }
   await write(bundle, `${outDir}/deno.ns`);
+  const mappedEntrypoint = `./file/${entrypoint}.js`;
   await Deno.writeTextFile(
-    `${outDir}/index.js`,
-    `import "./deno.ns/global.js";
-export default await import("./file/${entrypoint}.js");
-`,
+    `${outDir}/${mappedEntrypoint}`,
+    `import "../deno.ns/global.js";
+    import.meta.main = true;
+${await Deno.readTextFile(`${outDir}/${mappedEntrypoint}`)}`,
   );
   await Deno.writeTextFile(
     `${outDir}/package.json`,
     JSON.stringify(
       {
         type: "module",
-        main: "index.js",
+        main: mappedEntrypoint,
         "dependencies": {
           "node-fetch": "^2.6.1",
         },
