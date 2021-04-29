@@ -1,4 +1,4 @@
-import bundle from "./deno.ns/src/deno.ns.b.ts";
+import bundle from "./deno.ns/deno.ns.b.ts";
 import { writeAll } from "https://deno.land/std@0.95.0/io/util.ts";
 
 export const build = async (entrypoint: string, outDir: string) => {
