@@ -1,3 +1,0 @@
-[submodule "deno.ns"]
-	path = deno.ns
-	url = https://github.com/trgwii/deno.ns.git

@@ -1,4 +1,3 @@
-import bundle from "./deno.ns/deno.ns.b.ts";
 import { writeAll } from "https://deno.land/std@0.95.0/io/util.ts";
 
 export const build = async (entrypoint: string, outDir: string) => {
@@ -57,12 +56,11 @@ export const build = async (entrypoint: string, outDir: string) => {
     }
     await Deno.writeTextFile(mapped, replaced);
   }
-  await write(bundle, `${outDir}/deno.ns`);
   const mappedEntrypoint = `./file/${entrypoint}.js`;
   await Deno.writeTextFile(
     `${outDir}/${mappedEntrypoint}`,
-    `import "../deno.ns/global.js";
-    import.meta.main = true;
+    `import "deno.ns/global";
+import.meta.main = true;
 ${await Deno.readTextFile(`${outDir}/${mappedEntrypoint}`)}`,
   );
   await Deno.writeTextFile(
@@ -72,7 +70,7 @@ ${await Deno.readTextFile(`${outDir}/${mappedEntrypoint}`)}`,
         type: "module",
         main: mappedEntrypoint,
         "dependencies": {
-          "node-fetch": "^2.6.1",
+          "deno.ns": "^0.1.1",
         },
       },
       null,
