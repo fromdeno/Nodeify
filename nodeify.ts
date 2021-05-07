@@ -31,14 +31,9 @@ const replaceImportsInModule = (
   map: Record<string, string>,
   fetched: string[],
 ) => {
-  const thing = path.endsWith("brotli@v0.1.4/wasm.js");
   const replaced = data.replace(
     /from\s*["']([^"']+)["']/g,
     (_, x: string) => {
-      if (thing) {
-        console.log(_, x);
-        console.log(x);
-      }
       if (/^https?:/.test(x) && x.endsWith(".js")) {
         fetchJSModule(x, outDir, map, fetched).catch((err) =>
           console.error(err.message)
@@ -55,9 +50,6 @@ const replaceImportsInModule = (
         '"';
     },
   );
-  if (thing) {
-    console.log(data.slice(0, 100), replaced.slice(0, 100));
-  }
   return replaced;
 };
 
@@ -105,7 +97,7 @@ export const build = async (entrypoint: string, outDir: string) => {
         await fetchJSModule(diag.fileName, outDir, map, fetched);
       }
     }
-    // console.error(result.diagnostics);
+    console.error(result.diagnostics);
     // Deno.exit(1);
   }
 
