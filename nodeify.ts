@@ -20,7 +20,11 @@ const filterDots = (path: string) => {
 export const mapPath = (path: string) => {
   const url = new URL(path, "file://.");
   const proto = url.protocol.slice(0, -1);
-  const ext = url.pathname.endsWith(".js") ? "" : ".js";
+  const ext = url.pathname.endsWith(".js")
+    ? ""
+    : url.pathname.endsWith(".d.ts")
+    ? ""
+    : ".js";
   return filterDots(`${proto}/${url.hostname}${url.pathname}${ext}`);
 };
 
@@ -44,9 +48,10 @@ const replaceImportsInModule = (
           ? ((y) => y.startsWith(".") ? y : "../" + y)(
             "../".repeat(path.split("/").length - 2) + mapPath(x),
           )
-          : ((y) => y.endsWith(".js") ? y : y + ".js")(
-            x.startsWith(".") ? x : "./" + x,
-          )) +
+          : ((y) =>
+            y.endsWith(".js") ? y : y + (y.endsWith(".d.ts") ? "" : ".js"))(
+              x.startsWith(".") ? x : "./" + x,
+            )) +
         '"';
     },
   );
@@ -89,7 +94,11 @@ export const build = async (entrypoint: string, outDir: string) => {
   const map: Record<string, string> = {};
   const fetched: string[] = [];
   const result = await Deno.emit(entrypoint, {
-    compilerOptions: { allowJs: true, checkJs: true },
+    compilerOptions: {
+      allowJs: true,
+      checkJs: true,
+      declaration: true,
+    },
   });
   if (result.diagnostics.length > 0) {
     for (const diag of result.diagnostics) {
@@ -141,10 +150,14 @@ export const build = async (entrypoint: string, outDir: string) => {
     `${outDir}/index.js`,
     `import "deno.ns/global";\nexport * from "./${mappedEntrypoint}";\n`,
   );
+  const pack = JSON.parse(
+    await Deno.readTextFile(`${outDir}/package.json`).catch(() => ("{}")),
+  );
   await Deno.writeTextFile(
     `${outDir}/package.json`,
     JSON.stringify(
       {
+        ...pack,
         type: "module",
         main: "./index.js",
         "dependencies": {
