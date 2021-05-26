@@ -1,4 +1,5 @@
 import { writeAll } from "https://deno.land/std@0.95.0/io/util.ts";
+import { red } from "https://deno.land/std@0.97.0/fmt/colors.ts";
 import { toFileUrl } from "https://deno.land/std@0.95.0/path/mod.ts";
 
 const filterDots = (path: string) => {
@@ -88,6 +89,14 @@ export const fetchJSModule = async (
   file.close();
 };
 
+const diagnosticMessageHelper = (d: Deno.Diagnostic): string[] => [
+  ...d.messageText ? [d.messageText] : [],
+  ...d.messageChain ? diagnosticMessageHelper(d.messageChain) : [],
+];
+
+const diagnosticMessage = (d: Deno.Diagnostic) =>
+  diagnosticMessageHelper(d).join("\n");
+
 export const build = async (entrypoint: string, outDir: string) => {
   await Deno.remove(outDir).catch(() => {});
   await Deno.mkdir(outDir, { recursive: true });
@@ -106,7 +115,15 @@ export const build = async (entrypoint: string, outDir: string) => {
         await fetchJSModule(diag.fileName, outDir, map, fetched);
       }
     }
-    console.error(result.diagnostics);
+    result.diagnostics.forEach((d) =>
+      console.error(
+        [
+          `${red(diagnosticMessage(d))}`,
+          `\tin ${d.fileName}:${d.start?.line}:${d.start?.character}`,
+          // `\tat ${d.sourceLine}`,
+        ].join("\n"),
+      )
+    );
     // Deno.exit(1);
   }
 
