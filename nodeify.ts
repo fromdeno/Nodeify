@@ -178,7 +178,7 @@ export const build = async (entrypoint: string, outDir: string) => {
         type: "module",
         main: "./index.js",
         "dependencies": {
-          "deno.ns": "^0.1.1",
+          "deno.ns": "^0.2.0",
         },
       },
       null,
